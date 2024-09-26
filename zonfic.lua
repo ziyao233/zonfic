@@ -118,6 +118,13 @@ prettyPrintConfig(cfg)
 				  v = pprExprInfix(cfg.depends) });
 	end
 
+	if #cfg.select ~= 0 then
+		for _, dep in pairs(cfg.select) do
+			table.insert(t,
+				     { k = "select", v = pprExprInfix(dep) });
+		end
+	end
+
 	printTable(t);
 end
 
@@ -142,6 +149,9 @@ doSearch(arg)
 
 	for i, entry in ipairs(entries) do
 		prettyPrintConfig(entry);
+		if i ~= #entries then
+			io.stdout:write("\n");
+		end
 	end
 end
 

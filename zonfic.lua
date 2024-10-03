@@ -7,35 +7,14 @@ local os		= require "os";
 local table		= require "table";
 local math		= require "math";
 
+local util		= require "util";
+
 local kconfig		= require "kconfig";
 
 local kconfigPath	= "./Kconfig";
 local environmentPath	= "./zonfic.env.lua";
 
-local function
-pwarn(fmt, ...)
-	io.stderr:write(string.format(fmt .. "\n", ...));
-end
-
-local function
-perr(fmt, ...)
-	pwarn(fmt, ...);
-	os.exit(1);
-end
-
-local function
-printTable(t)
-	local l = 0;
-	for _, entry in ipairs(t) do
-		l = math.max(l, entry.k:len());
-	end
-
-	for _, entry in ipairs(t) do
-		local k, v = entry.k, entry.v;
-		print(("%s: %s%s"):format(k, (" "):rep(l - k:len()), v));
-	end
-end
-
+local pwarn, perr	= util.pwarn, util.perr;
 
 local function
 pprSymbol(s)
@@ -125,7 +104,7 @@ prettyPrintConfig(cfg)
 		end
 	end
 
-	printTable(t);
+	util.printTable(t);
 end
 
 local function

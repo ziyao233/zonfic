@@ -1,7 +1,7 @@
 MERGE		?= lmerge
 LUA		?= lua5.4
 
-SOURCES		:= zonfic.lua util.lua
+SOURCES		:= zonfic.lua util.lua expression.lua
 OUTPUT		:= zonfic
 
 .PHONY: default clean

@@ -7,6 +7,7 @@ local os		= require "os";
 local table		= require "table";
 local math		= require "math";
 
+local expression	= require "expression";
 local util		= require "util";
 
 local kconfig		= require "kconfig";
@@ -15,71 +16,6 @@ local kconfigPath	= "./Kconfig";
 local environmentPath	= "./zonfic.env.lua";
 
 local pwarn, perr	= util.pwarn, util.perr;
-
-local function
-pprSymbol(s)
-	return s.isConst and s.value or s.name;
-end
-
-local compareFn <const> = {
-	"equal", "unequal", "less", "less-or-eq", "greater", "greater-or-eq"
-};
-local compareFnRev = {};
-for _, v in pairs(compareFn) do
-	compareFnRev[v] = true;
-end
-
-local infixOp <const> = {
-	["or"]			= "||",
-	["and"]			= "&&",
-	["not"]			= "!",
-	["equal"]		= "==",
-	["unequal"]		= "!=",
-	["less"]		= "<",
-	["less-or-eq"]		= "<=",
-	["greater"]		= ">",
-	["greater-or-eq"]	= ">=",
-	["range"]		= ".."
-};
-
-local function
-pprExprPrefix(expr)
-	local fn = expr.fn;
-
-	if fn == "symbol" then
-		return pprSymbol(expr.ref);
-	elseif compareFnRev[fn] then
-		return ("(%s %s %s)"):
-		       format(fn, pprSymbol(expr.left), pprSymbol(expr.right));
-	elseif fn == "not" then
-		return ("(not %s)"):format(pprExprPrefix(expr.left));
-	else
-		return ("(%s %s %s)"):
-		       format(fn, pprExprPrefix(expr.left),
-		       		  pprExprPrefix(expr.right));
-	end
-end
-
-local function
-pprExprInfix(expr)
-	local fn = expr.fn;
-
-	if fn == "symbol" then
-		return pprSymbol(expr.ref);
-	elseif compareFnRev[fn] then
-		return ("(%s %s %s)"):
-		       format(pprSymbol(expr.left),
-			      infixOp[fn],
-			      pprSymbol(expr.right));
-	elseif fn == "not" then
-		return '!' .. pprExprPrefix(expr.left);
-	else
-		return ("(%s %s %s)"):
-		       format(pprExprInfix(expr.left),
-			      infixOp[fn],
-			      pprExprInfix(expr.right));
-	end
-end
 
 local function
 prettyPrintConfig(cfg)
@@ -94,13 +30,15 @@ prettyPrintConfig(cfg)
 
 	if cfg.depends then
 		table.insert(t, { k = "depends on",
-				  v = pprExprInfix(cfg.depends) });
+				  v = expression.pprExprInfix(cfg.depends) });
 	end
 
 	if #cfg.select ~= 0 then
 		for _, dep in pairs(cfg.select) do
-			table.insert(t,
-				     { k = "select", v = pprExprInfix(dep) });
+			table.insert(t, {
+						k = "select",
+						v = expression.pprExprInfix(dep)
+					});
 		end
 	end
 

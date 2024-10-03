@@ -13,7 +13,7 @@ local util		= require "util";
 local pwarn, perr = util.pwarn, util.perr;
 
 local function
-convertType(sym, v)
+toData(sym, v)
 	if sym.type == "string" then
 		if not (v:sub(1, 1) == '"' and v:sub(-1, -1) == '"') then
 			return nil;
@@ -56,7 +56,7 @@ parse(syms, path)
 			goto continue;
 		end
 
-		local t = convertType(sym, v);
+		local t = toData(sym, v);
 		if not t then
 			perr("Symbol %s: Invalid value \"%s\"", k, t);
 		end
@@ -80,6 +80,33 @@ parse(syms, path)
 	return values;
 end
 
+local function
+toString(sym, v)
+	if sym.type == "bool" or sym.type == "tristate" then
+		return v;
+	elseif sym.type == "integer" then
+		return ("%d"):format(v);
+	elseif sym.type == "hex" then
+		return ("0x%x"):format(v);
+	elseif sym.type == "string" then
+		return ("%q"):format(v);
+	else
+		perr("Symbol %s: Unknown type %s", sym.name, sym.type);
+	end
+end
+
+local function
+generate(syms, values, path)
+	local f = assert(io.open(path, "w"));
+
+	for k, v in pairs(values) do
+		f:write(("CONFIG_%s=%s\n"):format(k, toString(syms[k], v)));
+	end
+
+	f:close();
+end
+
 return {
-	parse	= parse,m
+	parse		= parse,
+	generate	= generate,
        };

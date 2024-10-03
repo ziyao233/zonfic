@@ -75,9 +75,19 @@ doSearch(arg)
 	end
 end
 
+local function
+doGenerate(arg)
+	if not arg[1] then
+		perr("Usage:\n\tzonfic generate <OUTPUT-CONFIG>");
+	end
+
+	configfile.generate(defArgs.cfgs, defArgs.values, arg[1]);
+end
+
 local opts = {
-	eval	= { func = function() end },	-- no-op, just evaluate defscript
-	search	= { func = doSearch },
+	eval = { func = function() end },	-- no-op, just evaluate defscript
+	generate = { func = doGenerate },
+	search = { func = doSearch },
 };
 
 local opt = opts[arg[1]];

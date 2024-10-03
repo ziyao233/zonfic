@@ -7,6 +7,7 @@ local os		= require "os";
 local table		= require "table";
 local math		= require "math";
 
+local configfile	= require "configfile";
 local expression	= require "expression";
 local util		= require "util";
 
@@ -105,6 +106,14 @@ defScriptEnv.setenv = function(env)
 	end
 
 	defArgs.cfgs = kconfig.parse(kconfigPath);
+end
+
+defScriptEnv.baseConfig = function(path)
+	if not defArgs.cfgs then
+		error("environment must be set before base configuration");
+	end
+
+	defArgs.values = configfile.parse(defArgs.cfgs, path);
 end
 
 defScriptEnv.log = function(s, ...)

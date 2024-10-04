@@ -108,5 +108,6 @@ end
 
 return {
 	parse		= parse,
+	toString	= toString,
 	generate	= generate,
        };

@@ -21,6 +21,33 @@ local pwarn, perr	= util.pwarn, util.perr;
 local defArgs = {};
 
 local function
+doDiff(arg)
+	local path = arg[1] or "./.config";
+
+	if not defArgs.values then
+		perr("Base configuration is not specified");
+	end
+
+	local loaded = configfile.parse(defArgs.cfgs, path);
+	local evaluated = defArgs.values;
+	local syms, toString = defArgs.cfgs, configfile.toString;
+	for k, v in pairs(loaded) do
+		local v_ = evaluated[k];
+		if not v_ then
+			pwarn("undefined symbol %s");
+		elseif v ~= v_ then
+			pwarn("%s: parsed %s, evaludated %s",
+			      k, toString(syms[k], v), toString(syms[k], v_));
+		end
+		evaluated[k] = nil;
+	end
+
+	for k, v in pairs(evaluated) do
+		pwarn("Symbol %s is not specified in %s", k, path);
+	end
+end
+
+local function
 prettyPrintConfig(cfg)
 	local t = {
 		{ k = "name", v = cfg.name },
@@ -81,10 +108,15 @@ doGenerate(arg)
 		perr("Usage:\n\tzonfic generate <OUTPUT-CONFIG>");
 	end
 
+	if not defArgs.values then
+		perr("Base configuration is not specified");
+	end
+
 	configfile.generate(defArgs.cfgs, defArgs.values, arg[1]);
 end
 
 local opts = {
+	diff = { func = doDiff },
 	eval = { func = function() end },	-- no-op, just evaluate defscript
 	generate = { func = doGenerate },
 	search = { func = doSearch },
